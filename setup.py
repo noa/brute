@@ -16,6 +16,7 @@ with open("README.rst", "rb") as f:
 
     setup(
         name = "cmdline-brute",
+        license = "MIT",
         packages = ["brute"],
         install_requires = ["clusterlib", "doit", "blessings"],
         entry_points = {

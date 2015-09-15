@@ -30,6 +30,7 @@ from doit.task import Task
 def get_brute_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('brute_script')
+    parser.add_argument('--brute-script-arg', action='append')
     parser.add_argument('--brute-dir', default=".")
     parser.add_argument('--brute-config')
     return parser.parse_known_args() # returns a tuple
@@ -130,6 +131,11 @@ class MyLoader(TaskLoader):
             job_names += [job_name]
             job_cmd_str = None
 
+            # Prepend fixed options
+            if len(MyLoader.args.brute_script_arg) > 0:
+                args = ' '.join(MyLoader.args.brute_script_arg)
+                param = args + ' ' + param
+            
             if MyLoader.config.get("brute","env") == 'local':
                 job_cmd_str = '%s %s' % (MyLoader.args.brute_script, param)
             elif MyLoader.config.get("brute","env") == 'slurm':
@@ -227,9 +233,6 @@ def get_conf(args):
     config.set("slurm", "cpus_per_task", "1")
     config.set("slurm", "ntasks_per_node", "1")
 
-    # SGE defaults (TODO)
-    config.add_section("sge")
-
     locs = None
     if args.brute_config:
         locs = [ args.brute_config ]
@@ -282,4 +285,4 @@ def main():
     MyLoader.args = args
     MyLoader.params = params
     MyLoader.config = config
-    sys.exit(DoitMain(loader).run([]))
+    sys.exit(DoitMain(loader).run(['--backend','json']))
