@@ -242,6 +242,7 @@ def get_conf(args):
 
     locs = None
     if args.brute_config:
+        print('using configuration from: ' + args.brute_config)
         locs = [ args.brute_config ]
     else:
         locs = [ os.curdir, os.environ.get("BRUTE_CONF") ]
@@ -253,10 +254,11 @@ def get_conf(args):
                 print('reading config from: ' + loc)
                 config.readfp( source )
                 return config
-        except IOError:
+        except IOError as e:
             if args.brute_config:
                 print('problem reading brute config from: ' + args.brute_config)
-                print('using defaults...')
+                print(str(e))
+                sys.exit(1)
             pass
     return config
 
