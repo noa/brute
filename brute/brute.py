@@ -30,7 +30,11 @@ from doit.task import Task
 def get_brute_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('brute_script')
+
+    # Any '#' characters that appear in these are replaced with
+    # the task index = 1, 2, ...
     parser.add_argument('--brute-script-arg', action='append')
+    
     parser.add_argument('--brute-dir', default=".")
     parser.add_argument('--brute-config')
     return parser.parse_known_args() # returns a tuple
@@ -133,7 +137,10 @@ class MyLoader(TaskLoader):
 
             # Prepend fixed options
             if len(MyLoader.args.brute_script_arg) > 0:
-                args = ' '.join(MyLoader.args.brute_script_arg)
+                args = []
+                for arg in MyLoader.args.brute_script_arg:
+                    args += [ arg.replace('#',str(i)) ]
+                args = ' '.join(args)
                 param = args + ' ' + param
             
             if MyLoader.config.get("brute","env") == 'local':
@@ -272,8 +279,8 @@ def main():
     # Get the product of parameters
     params = get_job_params(leftovers)
 
-    for p in params:
-        print(p)
+    #for p in params:
+    #    print(p)
 
     print(str(len(params)) + ' tasks')
     proceed = query_yes_no("Proceed?")
