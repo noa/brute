@@ -254,6 +254,9 @@ def get_conf(args):
                 config.readfp( source )
                 return config
         except IOError:
+            if args.brute_config:
+                print('problem reading brute config from: ' + args.brute_config)
+                print('using defaults...')
             pass
     return config
 
