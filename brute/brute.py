@@ -142,6 +142,10 @@ class MyLoader(TaskLoader):
                     args += [ arg.replace('#',str(i)) ]
                 args = ' '.join(args)
                 param = args + ' ' + param
+
+            # Write parameters to work directory
+            with open( os.path.join(MyLoader.args.brute_dir, job_name+".params"), 'w' ) as f:
+                f.write(param+"\n")
             
             if MyLoader.config.get("brute","env") == 'local':
                 job_cmd_str = '%s %s' % (MyLoader.args.brute_script, param)
