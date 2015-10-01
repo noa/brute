@@ -5,12 +5,7 @@
 import re
 from setuptools import setup
 
-version = re.search(
-    '^__version__\s*=\s*"(.*)"',
-    open('brute/brute.py').read(),
-    re.M
-    ).group(1)
-
+exec(open('brute/version.py').read())
 with open("README.rst", "rb") as f:
     long_descr = f.read().decode("utf-8")
 
@@ -22,7 +17,7 @@ with open("README.rst", "rb") as f:
         entry_points = {
             "console_scripts": ['brute = brute.brute:main']
         },
-        version = version,
+        version = __version__,
         description = "Brute force grid search",
         long_description = long_descr,
         author = "Nicholas Andrews",
