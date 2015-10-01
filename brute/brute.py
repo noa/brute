@@ -2,8 +2,6 @@
 
 """brute.brute: provides entry point main()."""
 
-__version__ = "0.1.0"
-
 import os
 import errno
 import sys
@@ -15,6 +13,8 @@ from configparser import ConfigParser
 from blessings import Terminal # curses wrapper
 import argparse                # for flexible CLI flags
 import pickle
+
+from .version import __version__
 
 from clusterlib.scheduler import submit # for job submission
 from clusterlib.scheduler import queued_or_running_jobs
@@ -31,6 +31,10 @@ def get_brute_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('brute_script')
 
+    parser.add_argument('-V', '--version',
+                        action='version',
+                        version='%(prog)s (version ' + __version__ + ')')
+    
     # Any '#' characters that appear in these are replaced with
     # the task index = 1, 2, ...
     parser.add_argument('--brute-script-arg', action='append')
@@ -274,6 +278,11 @@ def main():
         print('no tasks to run')
         sys.exit(0)
 
+    # Print version?
+    #if args.version:
+    #    print('brute version: ' + __version__)
+    #    return
+        
     # Read the configuration file, if any
     config = get_conf(args)
 
