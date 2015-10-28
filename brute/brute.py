@@ -37,7 +37,7 @@ def get_brute_args():
     
     # Any '#' characters that appear in these are replaced with
     # the task index = 1, 2, ...
-    parser.add_argument('--brute-script-arg', action='append')
+    # parser.add_argument('--brute-script-arg', action='append', default=[])
     
     parser.add_argument('--brute-dir', default=".")
     parser.add_argument('--brute-config')
@@ -270,12 +270,22 @@ def get_conf(args):
             pass
     return config
 
+def is_script_arg(t):
+    if t.startswith('-') or t.startswith('--'):
+        return False
+    return True
+
 def main():
     # Get command line arguments
     args, leftovers = get_brute_args()
 
+    # Pop the script arguments from leftovers
+    args.brute_script_arg = []
+    while is_script_arg(leftovers[0]):
+        args.brute_script_arg += [ leftovers.pop(0) ]
+    
     if leftovers == []:
-        print('no tasks to run')
+        print('nothing to do')
         sys.exit(0)
 
     # Print version?
