@@ -1,4 +1,4 @@
-# Brute: easy grid search ##
+# Brute: easy grid search #
 
 ## Installation ##
 
