@@ -34,6 +34,7 @@ def get_brute_args():
     parser.add_argument('-V', '--version',
                         action='version',
                         version='%(prog)s (version ' + __version__ + ')')
+    parser.add_argument('--brute-no-prompt', action='store_true')
     
     # Any '#' characters that appear in these are replaced with
     # the task index = 1, 2, ...
@@ -281,12 +282,13 @@ def main():
 
     # Pop the script arguments from leftovers
     args.brute_script_arg = []
-    while is_script_arg(leftovers[0]):
+    #print(leftovers)
+    while len(leftovers) > 0 and is_script_arg(leftovers[0]):
         args.brute_script_arg += [ leftovers.pop(0) ]
     
-    if leftovers == []:
-        print('nothing to do')
-        sys.exit(0)
+    #if leftovers == []:
+    #    print('nothing to do')
+    #    sys.exit(0)
 
     # Print version?
     #if args.version:
@@ -295,6 +297,13 @@ def main():
         
     # Read the configuration file, if any
     config = get_conf(args)
+
+    print('brute config:')
+    # dump entire config file
+    for section in config.sections():
+        print(section)
+        for option in config.options(section):
+            print(" ", option, "=", config.get(section, option))
 
     # Get absolute workspace path
     args.brute_dir = os.path.abspath(args.brute_dir)
@@ -311,9 +320,11 @@ def main():
     #    print(p)
 
     print(str(len(params)) + ' tasks')
-    proceed = query_yes_no("Proceed?")
-    if not proceed:
-        sys.exit(0)
+
+    if not args.brute_no_prompt:
+        proceed = query_yes_no("Proceed?")
+        if not proceed:
+            sys.exit(0)
 
     # Run the grid search
     loader = MyLoader()
