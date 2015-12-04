@@ -1,4 +1,8 @@
-# Brute: easy grid search ##
+# Brute: easy grid search #
+
+## What is it ##
+
+This command-line script lets you run any command with many possible inputs in a distributed environment such as SGE, SLURM, or a local machine with many processors. Basic checkpointing is provided via the doit library, so that failed jobs might be re-run without re-running all jobs. 
 
 ## Installation ##
 
