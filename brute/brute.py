@@ -102,8 +102,8 @@ def get_submission_script(cmd, name, workdir, config):
         if config.has_option("slurm","partition"):
             script += " --partition=" + config.get("slurm", "partition")
 
-        script += " --cpus-per-task=" + str(config.getint("slurm", "cpus_per_task"))
-        script += " --ntasks-per-node=" + str(config.getint("slurm", "ntasks_per_node"))
+        script += " --cpus-per-task=" + str(config.getint("slurm", "cpus-per-task"))
+        script += " --ntasks-per-node=" + str(config.getint("slurm", "ntasks-per-node"))
 
         return script
 
@@ -246,8 +246,8 @@ def get_conf(args):
     config.add_section("slurm")
     config.set("slurm", "time", "1:00:00")
     config.set("slurm", "memory", "2000")
-    config.set("slurm", "cpus_per_task", "1")
-    config.set("slurm", "ntasks_per_node", "1")
+    config.set("slurm", "cpus-per-task", "1")
+    config.set("slurm", "ntasks-per-node", "1")
 
     locs = None
     if args.brute_config:
