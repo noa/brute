@@ -14,6 +14,8 @@ from blessings import Terminal # curses wrapper
 import argparse                # for flexible CLI flags
 import pickle
 
+from util import get_conf
+
 from .version import __version__
 
 from clusterlib.scheduler import submit # for job submission
@@ -235,42 +237,6 @@ def get_job_params(leftovers):
 
     return params
 
-def get_conf(args):
-    config = ConfigParser()
-
-    # Brute defaults
-    config.add_section("brute")
-    config.set("brute", "env", "slurm")
-
-    # Slurm defaults
-    config.add_section("slurm")
-    config.set("slurm", "time", "1:00:00")
-    config.set("slurm", "memory", "2000")
-    config.set("slurm", "cpus-per-task", "1")
-    config.set("slurm", "ntasks-per-node", "1")
-
-    locs = None
-    if args.brute_config:
-        print('using configuration from: ' + args.brute_config)
-        locs = [ args.brute_config ]
-    else:
-        locs = [ os.curdir, os.environ.get("BRUTE_CONF") ]
-    for loc in locs:
-        if loc is None:
-            continue
-        try:
-            with open(os.path.join(loc, "brute.conf")) as source:
-                print('reading config from: ' + loc)
-                config.readfp( source )
-                return config
-        except IOError as e:
-            if args.brute_config:
-                print('problem reading brute config from: ' + args.brute_config)
-                print(str(e))
-                sys.exit(1)
-            pass
-    return config
-
 def is_script_arg(t):
     if t.startswith('-') or t.startswith('--'):
         return False
@@ -282,28 +248,11 @@ def main():
 
     # Pop the script arguments from leftovers
     args.brute_script_arg = []
-    #print(leftovers)
     while len(leftovers) > 0 and is_script_arg(leftovers[0]):
         args.brute_script_arg += [ leftovers.pop(0) ]
     
-    #if leftovers == []:
-    #    print('nothing to do')
-    #    sys.exit(0)
-
-    # Print version?
-    #if args.version:
-    #    print('brute version: ' + __version__)
-    #    return
-        
     # Read the configuration file, if any
     config = get_conf(args)
-
-    print('brute config:')
-    # dump entire config file
-    for section in config.sections():
-        print(section)
-        for option in config.options(section):
-            print(" ", option, "=", config.get(section, option))
 
     # Get absolute workspace path
     args.brute_dir = os.path.abspath(args.brute_dir)
@@ -315,9 +264,6 @@ def main():
 
     # Get the product of parameters
     params = get_job_params(leftovers)
-
-    #for p in params:
-    #    print(p)
 
     print(str(len(params)) + ' tasks')
 

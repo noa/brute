@@ -13,9 +13,11 @@ with open("README.rst", "rb") as f:
         name = "cmdline-brute",
         license = "MIT",
         packages = ["brute"],
+        py_modules = ["util"],
         install_requires = ["clusterlib", "doit", "blessings"],
         entry_points = {
-            "console_scripts": ['brute = brute.brute:main']
+            "console_scripts": ['brute  = brute.brute:main',
+                                'scrape = brute.scrape:main']
         },
         version = __version__,
         description = "Brute force grid search",
