@@ -1,6 +1,6 @@
-# Brute: easy grid search #
+# Brute: easy grid search
 
-## Introduction ##
+## Introduction
 
 This command-line script lets you run any command with many possible
 inputs in a distributed environment such as SGE, SLURM, or a local
@@ -8,21 +8,19 @@ machine with many processors. Basic checkpointing is provided via the
 doit library, so that failed jobs might be re-run without re-running
 all jobs.
 
-## Installation ##
+## Installation
 
 Run:
-``
-python setup.py install
-``
+
+    python setup.py install
+
 This should place the command `brute` in your path.
 
-## Usage ##
+## Usage
 
 Sample usage:
 
-``
-brute worker.py --foo 1,2,3 --bar x
-``
+    brute worker.py --foo 1,2,3 --bar x
 
 will execute 3 tasks:
 
@@ -37,7 +35,7 @@ be controlled via the `--brute-dir` flag.
 Grid-specific options go in a configuration file. See
 `examples/brute.conf` for an example.
 
-## Summarizing results ##
+## Summarizing results
 
 In addition to the `brute` command-line script, the `scrape` command
 is provided to facilitate summarizing the results of large grid
