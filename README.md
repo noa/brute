@@ -39,20 +39,24 @@ Grid-specific options go in a configuration file. See
 
 In addition to the `brute` command-line script, the `scrape` command
 is provided to facilitate summarizing the results of large grid
-jobs. This command has several uses.
+jobs. This command has two main uses:
 
-1. Obtain the job return status information. Either via `--status`,
-   which produces a summary of the return status, or `--status-verbose`,
-   which prints the return status for all jobs.
+1. Obtain the job return status information. This is the default
+   behavior, and produces a summary of the return
+   status. Alternatively, `--status-verbose` prints the return status
+   for all jobs instead of a summary.
 
 2. For jobs which produce a single number as a result, `scrape` may be
-   used to sort and summarize the jobs according to this score.  This
-   is especially useful in machine learning applications. For this
-   purpose, a Python script must be provided via `--scraper`. This
-   script must provide the following method:
-       def scrape(PATH):
-          # TODO: implement code to scrape job output
-          return SCORE
-   The result will be the jobs and their arguments, sorted by their
-   scores. The `--max` argument may be used to limit the number of
-   displayed results.
+   used to sort and summarize the jobs according to this score.
+
+This second use is especially useful in machine learning
+applications. For this purpose, a Python script must be provided via
+`--scraper`. This script must provide the following method:
+
+    def scrape(PATH):
+        # TODO: implement code to scrape job output
+        return SCORE
+
+The result will be the jobs and their arguments, sorted by their
+scores. The `--max` argument may be used to limit the number of
+displayed results.
