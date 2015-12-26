@@ -50,13 +50,9 @@ jobs. This command has several uses.
    is especially useful in machine learning applications. For this
    purpose, a Python script must be provided via `--scraper`. This
    script must provide the following method:
-
-   ``
-   def scrape(PATH):
-      # TODO: implement code to scrape job output
-      return SCORE
-   ``
-
+       def scrape(PATH):
+          # TODO: implement code to scrape job output
+          return SCORE
    The result will be the jobs and their arguments, sorted by their
    scores. The `--max` argument may be used to limit the number of
    displayed results.
