@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This package provides command-line scripts that make it easier to run jobs in compute grid environments such as SGE and SLURM. The package is called *brute* after "brute force" parameter searches, in which all possible parameters are explored. A typical use case for this package is hyper-parameter search in machine learning applications.
+This package provides command-line scripts that make it easier to run jobs in compute grid environments such as SGE and SLURM. The package is called *brute* after "brute force" parameter searches, in which all possible parameter combinations are explored. A typical use case for this package is hyper-parameter search in machine learning applications.
 
 ## Installation
 
