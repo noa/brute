@@ -2,25 +2,21 @@
 
 ## Introduction
 
-This command-line script lets you run any command with many possible
-inputs in a distributed environment such as SGE, SLURM, or a local
-machine with many processors. Basic checkpointing is provided via the
-doit library, so that failed jobs might be re-run without re-running
-all jobs.
+This package provides command-line scripts that facilate running jobs in compute grid environments such as SGE and SLURM. The package is called *brute* after "brute force" parameter searches, in which all possible parameters are explored. A typical use case for this package is hyper-parameter search in machine learning applications.
 
 ## Installation
 
 Run:
 
-    python setup.py install
+    python3 setup.py install --user
 
-This should place the command `brute` in your path.
+This will place the commands `bsubmit`, `bstatus`, and `bscrape` in your path.
 
-## Usage
+## Submitting jobs
 
 Sample usage:
 
-    brute worker.py --foo 1,2,3 --bar x
+    bsubmit worker.py --foo 1,2,3 --bar x
 
 will execute 3 tasks:
 
@@ -35,28 +31,33 @@ be controlled via the `--brute-dir` flag.
 Grid-specific options go in a configuration file. See
 `examples/brute.conf` for an example.
 
+## Job status
+
+The `bstatus` command summarizes the status of jobs in the supplied path.
+
+sample usage:
+
+    bstatus .
+
+Substitute `.` with the workspace passed to `bsubmit`, if different than the current directory.
+
 ## Summarizing results
 
-In addition to the `brute` command-line script, the `scrape` command
-is provided to facilitate summarizing the results of large grid
-jobs. This command has two main uses:
+The `bscrape` command is provided to summarize the output of jobs run via `bsubmit`
+when those jobs produce a single number, such as a score or loss, as a final result.
 
-1. Obtain the job return status information. This is the default
-   behavior, and produces a summary of the return
-   status. Alternatively, `--status-verbose` prints the return status
-   for all jobs instead of a summary.
+Sample usage:
 
-2. For jobs which produce a single number as a result, `scrape` may be
-   used to sort and summarize the jobs according to this score.
+    bscrape . worker.py
 
-This second use is especially useful in machine learning
-applications. For this purpose, a Python script must be provided via
-`--scraper`. This script must provide the following method:
+will return the parameters and score for each job run via `bsubmit` in the current directory.
+If `bsubmit` used another workspace, replace `.` with that workspace. The second argument
+(`worker.py` above) must implement a `scrape()` method as:
 
     def scrape(PATH):
-        # TODO: implement code to scrape job output
+        # TODO: implement code to scrape job output from log to stdout/stderr
         return SCORE
 
-The result will be the jobs and their arguments, sorted by their
+The result will be the jobs and their parameters, sorted by their
 scores. The `--max` argument may be used to limit the number of
 displayed results.
