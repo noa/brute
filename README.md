@@ -12,7 +12,7 @@ Run:
 
 This will place the commands `bsubmit`, `bstatus`, and `bscrape` in your path.
 
-## Quick State
+## Quick Start
 
 Under `examples/`, there are three directories for different compute environments: `local`, `sge`, and `slurm`.
 
