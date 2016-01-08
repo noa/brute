@@ -12,7 +12,7 @@ Run:
 
 This will place the commands `bsubmit`, `bstatus`, and `bscrape` in your path.
 
-## Example usage
+## Quick State
 
 Under `examples/`, there are three directories for different compute environments: `local`, `sge`, and `slurm`.
 
@@ -27,7 +27,13 @@ as
 
 Behind the scenes, `bsubmit` abstracts away the underlying compute environment, and submits jobs for all combinations of the arguments. The special argument `x#` tells brute to replace `#` with the job number when submitting the job to the queue, which is useful for producing output files.
 
-While the jobs are running or after they have finished, the `bstatus` command may be used to check the logs for signs of success or failure. This command knows about queue-specific errors such as resource limits.
+While the jobs are running or after they have finished, the `bstatus` command may be used to check the logs for signs of success or failure. This command knows about queue-specific errors such as resource limits. If everything goes well:
+
+    JOB STATUS
+    --------------------------
+    STATUS:OK : 6
+    --------------------------
+    TOTAL: 6
 
 Finally, `bscrape` makes it easy summarize the output of jobs run using `bsubmit`:
 
