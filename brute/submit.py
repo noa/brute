@@ -10,7 +10,6 @@ import subprocess
 import itertools
 import glob
 from configparser import ConfigParser
-from blessings import Terminal # curses wrapper
 import argparse                # for flexible CLI flags
 import pickle
 

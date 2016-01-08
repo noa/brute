@@ -17,13 +17,26 @@ from clusterlib.storage import sqlite3_loads
 from util import get_conf
 from .version import __version__
 
+class Status(Enum):
+    ok = 1,
+    memory = 2,
+    nonzero = 3
+
+    def __str__(self):
+        if self.name == 'ok':
+            return 'STATUS:OK'
+        if self.name == 'memory':
+            return 'STATUS:ERROR:MEMORY'
+        if self.name == 'nonzero':
+            return 'STATUS:ERROR:NONZERO'
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('workspace')
-    parser.add_argument('scraper',
-                        help='scraper script which provides a [float] scrape(PATH) method')
     parser.add_argument('--brute-config')
-    parser.add_argument('--max', type=int, default=15)
+    parser.add_argument('--status-verbose',
+                        action='store_true',
+                        help='show the return status of all jobs')
     parser.add_argument('-V','--version',
                         action='version',
                         version='%(prog)s (version ' + __version__ + ')')
@@ -52,21 +65,11 @@ def main():
 
     assert os.path.isdir(args.workspace), "not a directory: " + args.workspace
     
-    # Read scraper script
-    if args.scraper:
-        import importlib.machinery
-        loader = importlib.machinery.SourceFileLoader("scraper", args.scraper)
-        mod = loader.load_module()
-        assert mod.scrape, "no scrape() method in " + args.scraper
-    
     # Read the configuration file
     config = get_conf(args)
 
-    for s in config.sections():
-        for o in config[s]:
-            print(o + ' : ' + config[s][o])
-
-    all_results = []
+    # Dictionary to store job results
+    job_status = dict()
 
     # Number of iles
     nfiles = 0
@@ -86,18 +89,28 @@ def main():
             for f2 in os.listdir(expt_dir):
                 if fnmatch.fnmatch(f2, '*.txt'): # job log output
                     log = os.path.join(expt_dir, f2)
-                    result = mod.scrape(log)
-                    if result:
-                        all_results.append((result, prm_str, f))
-                    else:
-                        print('no result for: ' + f)
+                    status = get_job_status(log, config)
+                    job_status[job_num] = status
                     break
             bar.next()
 
     # End the progress bar
     bar.finish()
 
-    from operator import itemgetter
-    for e in sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]:
-        print(' '.join(e))
-    
+    if args.verbose:
+        for n in job_status:
+            print('n='+n+' status='+str(job_status[n]))
+
+    if True:
+        print('JOB STATUS')
+        print('--------------------------')
+        import collections
+        stats = collections.defaultdict(int)
+        for n in job_status:
+            stats[job_status[n]] += 1
+        total = 0
+        for k in stats:
+            total += stats[k]
+            print(str(k) + ' : ' + str(stats[k]))
+        print('--------------------------')
+        print('TOTAL: ' + str(total))    
