@@ -8,7 +8,7 @@ This package provides command-line scripts that make it easier to run jobs in co
 
 Run:
 
-    python3 setup.py install --user
+    $ python3 setup.py install --user
 
 This will place the commands `bsubmit`, `bstatus`, and `bscrape` in your path.
 
@@ -23,13 +23,13 @@ The `worker.py` script will sleep for a random amount of time, then log a final 
 The main functionality of brute is via the `bsubmit` command line script, which may be used 
 as
 
-    bsubmit worker.py x# y --baz yes,no --foo 10,20,30
+    $ bsubmit worker.py x# y --baz yes,no --foo 10,20,30
 
 Behind the scenes, `bsubmit` abstracts away the underlying compute environment, and submits jobs for all combinations of the arguments. The special argument `x#` tells brute to replace `#` with the job number when submitting the job to the queue, which is useful for producing output files.
 
 While the jobs are running or after they have finished, the `bstatus` command may be used to check the logs for signs of success or failure. This command knows about queue-specific errors such as resource limits. If everything goes well:
 
-    bstatus .
+    $ bstatus .
 
     JOB STATUS
     --------------------------
@@ -39,7 +39,7 @@ While the jobs are running or after they have finished, the `bstatus` command ma
 
 Finally, `bscrape` makes it easy summarize the output of jobs run using `bsubmit`:
 
-    bscrape . worker.py
+    $ bscrape . worker.py
 
     Processing |################################| 6/6
     0.9213163488004676 baz no foo 30 worker2.params
@@ -55,7 +55,7 @@ More details on this command are given below.
 
 Sample usage:
 
-    bsubmit worker.py --foo 1,2,3 --bar x
+    $ bsubmit worker.py --foo 1,2,3 --bar x
 
 will execute 3 tasks:
 
@@ -76,7 +76,7 @@ The `bstatus` command summarizes the status of jobs in the supplied path.
 
 sample usage:
 
-    bstatus .
+    $ bstatus .
 
 Substitute `.` with the workspace passed to `bsubmit`, if different than the current directory.
 
@@ -87,7 +87,7 @@ when those jobs produce a single number, such as a score or loss, as a final res
 
 Sample usage:
 
-    bscrape . worker.py
+    $ bscrape . worker.py
 
 will return the parameters and score for each job run via `bsubmit` in the current directory.
    
