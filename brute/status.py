@@ -30,11 +30,19 @@ class Status(Enum):
         if self.name == 'nonzero':
             return 'STATUS:ERROR:NONZERO'
 
+def get_job_status(path, config):
+    for line in open(path):
+        if line.find('Exceeded job memory limit') >= 0:
+            return Status.memory
+        if line.find('Exited with exit code') >= 0:
+            return Status.nonzero
+    return Status.ok
+        
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('workspace')
     parser.add_argument('--brute-config')
-    parser.add_argument('--status-verbose',
+    parser.add_argument('--verbose',
                         action='store_true',
                         help='show the return status of all jobs')
     parser.add_argument('-V','--version',

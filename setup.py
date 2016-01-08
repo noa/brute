@@ -19,7 +19,7 @@ setup(
     license = "MIT",
     packages = ["brute"],
     py_modules = ["util"],
-    install_requires = ["clusterlib", "doit"],
+    install_requires = ["clusterlib", "doit", "progress"],
     entry_points = {
         "console_scripts": ['bsubmit = brute.submit:main',
                             'bstatus = brute.status:main',

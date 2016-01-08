@@ -62,10 +62,6 @@ def main():
     # Read the configuration file
     config = get_conf(args)
 
-    for s in config.sections():
-        for o in config[s]:
-            print(o + ' : ' + config[s][o])
-
     all_results = []
 
     # Number of iles
@@ -99,5 +95,5 @@ def main():
 
     from operator import itemgetter
     for e in sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]:
-        print(' '.join(e))
+        print(' '.join([str(x) if type(x) == float else x for x in e]))
     
