@@ -50,7 +50,16 @@ Sample usage:
 
     bscrape . worker.py
 
-will return the parameters and score for each job run via `bsubmit` in the current directory.
+will return the parameters and score for each job run via `bsubmit` in the current directory. For instance, running the `scrape.sh` in `examples/local` yields the following output:
+
+    Processing |################################| 6/6
+    0.9213163488004676 baz no foo 30 worker2.params
+    0.920159571765027 baz yes foo 30 worker5.params
+    0.8641904297067807 baz no foo 10 worker1.params
+    0.5867760353344568 baz yes foo 20 worker6.params
+    0.21614957715926542 baz no foo 20 worker3.params
+    0.06255650484871556 baz yes foo 10 worker4.params
+   
 If `bsubmit` used another workspace, replace `.` with that workspace. The second argument
 (`worker.py` above) must implement a `scrape()` method as:
 
@@ -61,3 +70,18 @@ If `bsubmit` used another workspace, replace `.` with that workspace. The second
 The result will be the jobs and their parameters, sorted by their
 scores. The `--max` argument may be used to limit the number of
 displayed results.
+
+## A complete example
+
+Under `examples/`, there are three directories for different compute environments: `local`, `sge`, and `slurm`.
+
+Let's look at `local`. There is a script called `worker.py` which is a stand-in for what you would want to run (e.g. my_compute_job.py). It does not have to be a Python script--any command line executable works. 
+
+The `worker.py` script will sleep for a random amount of time, then log a final number (also random) as a toy result (in practice, this might be some kind of performance metric).
+
+The main functionality of brute is via the `bsubmit` command line script, which may be used 
+as
+
+    bsubmit worker.py x# y --baz yes,no --foo 10,20,30
+
+Behind the scenes, `bsubmit` abstracts away the underlying compute environment, and submits jobs for all combinations of the arguments. The special argument `x#` tells brute to replace `#` with the job number when submitting the job to the queue, which is useful for producing output files.
