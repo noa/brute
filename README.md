@@ -29,6 +29,8 @@ Behind the scenes, `bsubmit` abstracts away the underlying compute environment, 
 
 While the jobs are running or after they have finished, the `bstatus` command may be used to check the logs for signs of success or failure. This command knows about queue-specific errors such as resource limits. If everything goes well:
 
+    bstatus .
+
     JOB STATUS
     --------------------------
     STATUS:OK : 6
