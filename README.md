@@ -25,7 +25,13 @@ as
 
     $ bsubmit worker.py x# y --baz yes,no --foo 10,20,30
 
-Behind the scenes, `bsubmit` abstracts away the underlying compute environment, and submits jobs for all combinations of the arguments. The special argument `x#` tells brute to replace `#` with the job number when submitting the job to the queue, which is useful for producing output files.
+Behind the scenes, `bsubmit` abstracts away the underlying compute environment, and submits jobs for all combinations of the arguments. The special argument `x#` tells brute to replace `#` with the job number when submitting the job to the queue, which is useful for producing output files. This produces:
+
+    worker1/
+    worker1.params
+    worker2/
+    worker2.params
+    [...]
 
 While the jobs are running or after they have finished, the `bstatus` command may be used to check the logs for signs of success or failure. This command knows about queue-specific errors such as resource limits. If everything goes well:
 
