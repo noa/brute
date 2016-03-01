@@ -141,7 +141,7 @@ class MyLoader(TaskLoader):
             job_names += [job_name]
             job_cmd_str = None
 
-            # Prepend fixed options
+            # Prepend fixed options:
             if len(MyLoader.args.brute_script_arg) > 0:
                 args = []
                 for arg in MyLoader.args.brute_script_arg:
@@ -149,7 +149,10 @@ class MyLoader(TaskLoader):
                 args = ' '.join(args)
                 param = args + ' ' + param
 
-            # Write parameters to work directory
+            # Replace any # symbols in param with job index:
+            param = param.replace('#',str(i))
+                
+            # Write parameters to work directory:
             with open( os.path.join(MyLoader.args.brute_dir, job_name+".params"), 'w' ) as f:
                 f.write(param+"\n")
             
@@ -196,6 +199,8 @@ class MyLoader(TaskLoader):
         return task_list, config
 
 def get_job_params(leftovers):
+    assert len(leftovers) % 2 == 0, 'uneven number of left-over arguments'
+    
     params = []
     leftovers_dict = dict()
     i = 0
@@ -265,6 +270,8 @@ def main():
     params = get_job_params(leftovers)
 
     print(str(len(params)) + ' tasks')
+    #print('tasks:')
+    #print(params)
 
     if not args.brute_no_prompt:
         proceed = query_yes_no("Proceed?")
