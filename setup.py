@@ -19,7 +19,7 @@ setup(
     license = "MIT",
     packages = ["brute"],
     py_modules = ["util"],
-    install_requires = ["clusterlib", "doit", "progress"],
+    install_requires = ["clusterlib", "doit", "progress", "prompter"],
     entry_points = {
         "console_scripts": ['bsubmit = brute.submit:main',
                             'bstatus = brute.status:main',
@@ -32,5 +32,3 @@ setup(
     author_email = "noandrews@gmail.com",
     url = "https://bitbucket.org/noandrews/brute",
 )
-
-

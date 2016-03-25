@@ -9,6 +9,7 @@ import time
 import subprocess
 import itertools
 import glob
+from prompter import prompt, yesno
 from configparser import ConfigParser
 import argparse                # for flexible CLI flags
 import pickle
@@ -36,11 +37,11 @@ def get_brute_args():
                         action='version',
                         version='%(prog)s (version ' + __version__ + ')')
     parser.add_argument('--brute-no-prompt', action='store_true')
-    
+
     # Any '#' characters that appear in these are replaced with
     # the task index = 1, 2, ...
     # parser.add_argument('--brute-script-arg', action='append', default=[])
-    
+
     parser.add_argument('--brute-dir', default=".")
     parser.add_argument('--brute-config')
     return parser.parse_known_args() # returns a tuple
@@ -53,43 +54,17 @@ def mkdir_p(path):
             pass
         else: raise
 
-def query_yes_no(question, default="yes"):
-    """Ask a yes/no question via raw_input() and return their answer.
-
-    "question" is a string that is presented to the user.
-    "default" is the presumed answer if the user just hits <Enter>.
-        It must be "yes" (the default), "no" or None (meaning
-        an answer is required of the user).
-
-    The "answer" return value is True for "yes" or False for "no".
-    """
-    valid = {"yes": True, "y": True, "ye": True,
-             "no": False, "n": False}
-
-    if default is None:
-        prompt = " [y/n] "
-    elif default == "yes":
-        prompt = " [Y/n] "
-    elif default == "no":
-        prompt = " [y/N] "
-    else:
-        raise ValueError("invalid default answer: '%s'" % default)
-
-    while True:
-        sys.stdout.write(question + prompt)
-        choice = input().lower()
-        if default is not None and choice == '':
-            return valid[default]
-        elif choice in valid:
-            return valid[choice]
-        else:
-            sys.stdout.write("Please respond with 'yes' or 'no' "
-                             "(or 'y' or 'n').\n")
-
 def get_submission_script(cmd, name, workdir, config):
     backend=config.get("brute", "env")
-
-    if backend == "slurm":
+    script = None
+    if backend == "sge":
+        script = submit(cmd,
+                        job_name=name,
+                        time=config.get("sge","time"),
+                        memory=config.getint("sge","memory"),
+                        backend=backend,
+                        log_directory=workdir)
+    elif backend == "slurm":
         script = submit(cmd,
                         job_name=name,
                         time=config.get("slurm","time"),
@@ -106,15 +81,17 @@ def get_submission_script(cmd, name, workdir, config):
         script += " --cpus-per-task=" + str(config.getint("slurm", "cpus-per-task"))
         script += " --ntasks-per-node=" + str(config.getint("slurm", "ntasks-per-node"))
 
-        return script
-
-    if backend == "local":
+    elif backend == "local":
         script = '#! /usr/bin/env sh\ncd $(dirname $0)\nCMD="%s"\n$CMD &> %s\n' % (cmd, os.path.join(workdir, "log.txt"))
-        return script
+    else:
+        print("[fatal] unknown backend: " + str(backend))
+        sys.exit(1)
 
-    return None
+    return script
 
 def write_script_to_file(script, path):
+    #print(type(script))
+    #print(script)
     f = open(path, 'w')
     f.write(script)
     f.close()
@@ -151,11 +128,11 @@ class MyLoader(TaskLoader):
 
             # Replace any # symbols in param with job index:
             param = param.replace('#',str(i))
-                
+
             # Write parameters to work directory:
             with open( os.path.join(MyLoader.args.brute_dir, job_name+".params"), 'w' ) as f:
                 f.write(param+"\n")
-            
+
             if MyLoader.config.get("brute","env") == 'local':
                 job_cmd_str = '%s %s' % (MyLoader.args.brute_script, param)
             elif MyLoader.config.get("brute","env") == 'slurm':
@@ -200,7 +177,7 @@ class MyLoader(TaskLoader):
 
 def get_job_params(leftovers):
     assert len(leftovers) % 2 == 0, 'uneven number of left-over arguments'
-    
+
     params = []
     leftovers_dict = dict()
     i = 0
@@ -254,7 +231,7 @@ def main():
     args.brute_script_arg = []
     while len(leftovers) > 0 and is_script_arg(leftovers[0]):
         args.brute_script_arg += [ leftovers.pop(0) ]
-    
+
     # Read the configuration file, if any
     config = get_conf(args)
 
@@ -274,7 +251,7 @@ def main():
     #print(params)
 
     if not args.brute_no_prompt:
-        proceed = query_yes_no("Proceed?")
+        proceed = yesno('Submit?')
         if not proceed:
             sys.exit(0)
 
