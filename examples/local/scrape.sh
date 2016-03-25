@@ -1,5 +1,5 @@
 #! /usr/bin/env sh
 
-bscrape . worker.py
+bscrape . ../scraper.py
 
 # eof

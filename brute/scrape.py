@@ -2,10 +2,11 @@
 
 """brute.status: provides entry point main()."""
 
+import sys
 import fnmatch
 import os
 import errno
-from progress.bar import Bar 
+from progress.bar import Bar
 import subprocess
 import argparse
 import importlib
@@ -46,19 +47,18 @@ def get_job_num(s):
     tail = s[len(head):]
     return tail
 
+def run_command(command):
+    p = subprocess.Popen(command,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    return p.stdout.read()
+
 def main():
     # Read arguments
     args = get_args()
 
     assert os.path.isdir(args.workspace), "not a directory: " + args.workspace
-    
-    # Read scraper script
-    if args.scraper:
-        import importlib.machinery
-        loader = importlib.machinery.SourceFileLoader("scraper", args.scraper)
-        mod = loader.load_module()
-        assert mod.scrape, "no scrape() method in " + args.scraper
-    
+
     # Read the configuration file
     config = get_conf(args)
 
@@ -69,9 +69,9 @@ def main():
     for f in os.listdir(args.workspace):
         if fnmatch.fnmatch(f, '*.params'):
             nfiles += 1
-        
+
     bar = Bar('Processing', max=nfiles)
-    
+
     for f in os.listdir(args.workspace):
         if fnmatch.fnmatch(f, '*.params'):
             expt_params = os.path.join(args.workspace, f)
@@ -82,7 +82,7 @@ def main():
             for f2 in os.listdir(expt_dir):
                 if fnmatch.fnmatch(f2, '*.txt'): # job log output
                     log = os.path.join(expt_dir, f2)
-                    result = mod.scrape(log)
+                    result = run_command([args.scraper, log])
                     if result:
                         all_results.append((result, prm_str, f))
                     else:
@@ -96,4 +96,3 @@ def main():
     from operator import itemgetter
     for e in sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]:
         print(' '.join([str(x) if type(x) == float else x for x in e]))
-    

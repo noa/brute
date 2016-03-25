@@ -29,5 +29,8 @@ if __name__ == "__main__":
         print('\t' + k + ' = ' + str(v))
     print('running...')
     time.sleep(random.randint(0,10))
+    print('DONE!')
+    result = random.random()
+    print('result ' + str(result) )
 
 # eof
