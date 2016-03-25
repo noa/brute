@@ -56,6 +56,8 @@ def mkdir_p(path):
 
 def get_submission_script(cmd, name, workdir, config):
     backend=config.get("brute", "env")
+    assert cmd
+    assert name
     script = None
     if backend == "sge":
         script = submit(cmd,
@@ -133,10 +135,16 @@ class MyLoader(TaskLoader):
             with open( os.path.join(MyLoader.args.brute_dir, job_name+".params"), 'w' ) as f:
                 f.write(param+"\n")
 
-            if MyLoader.config.get("brute","env") == 'local':
+            e = MyLoader.config.get("brute","env")
+            if e == 'local':
                 job_cmd_str = '%s %s' % (MyLoader.args.brute_script, param)
-            elif MyLoader.config.get("brute","env") == 'slurm':
+            elif e == 'slurm':
                 job_cmd_str = 'srun %s %s' % (MyLoader.args.brute_script, param)
+            elif e == 'sge':
+                job_cmd_str = '%s %s' % (MyLoader.args.brute_script, param)
+            else:
+                print("[FATAL] unknown env: " + str(e))
+                sys.exit(1)
 
             # Job work directory
             job_work_dir = os.path.join(MyLoader.args.brute_dir, job_name)
