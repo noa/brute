@@ -15,7 +15,6 @@ from configparser import ConfigParser
 from clusterlib.scheduler import submit # for job submission
 from clusterlib.scheduler import queued_or_running_jobs
 from clusterlib.storage import sqlite3_loads
-from util import get_conf
 from .version import __version__
 
 def get_args():
@@ -50,16 +49,13 @@ def run_command(command):
     p = subprocess.Popen(command,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
-    return p.stdout.read()
+    return float(p.stdout.read())
 
 def main():
     # Read arguments
     args = get_args()
 
     assert os.path.isdir(args.workspace), "not a directory: " + args.workspace
-
-    # Read the configuration file
-    config = get_conf(args)
 
     all_results = []
 
@@ -94,4 +90,5 @@ def main():
 
     from operator import itemgetter
     for e in sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]:
-        print(' '.join([str(x) if type(x) == float else x for x in e]))
+        print(' '.join([str(x) for x in e]))
+        #print(' '.join([str(x) if type(x) == float else x for x in e]))
