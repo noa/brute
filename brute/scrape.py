@@ -23,7 +23,6 @@ def get_args():
     parser.add_argument('workspace')
     parser.add_argument('scraper',
                         help='scraper script which provides a [float] scrape(PATH) method')
-    parser.add_argument('--brute-config')
     parser.add_argument('--max', type=int, default=15)
     parser.add_argument('-V','--version',
                         action='version',
