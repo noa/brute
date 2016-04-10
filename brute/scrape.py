@@ -10,6 +10,7 @@ from progress.bar import Bar
 import subprocess
 import argparse
 import importlib
+from tabulate import tabulate
 from enum import Enum
 from configparser import ConfigParser
 from clusterlib.scheduler import submit # for job submission
@@ -22,7 +23,7 @@ def get_args():
     parser.add_argument('workspace')
     parser.add_argument('scraper',
                         help='scraper script which provides a [float] scrape(PATH) method')
-    parser.add_argument('--max', type=int, default=15)
+    parser.add_argument('--max', type=int, default=100)
     parser.add_argument('-V','--version',
                         action='version',
                         version='%(prog)s (version ' + __version__ + ')')
@@ -30,15 +31,7 @@ def get_args():
 
 def get_param_str(path):
     lines = open(path).readlines()
-    prms = lines[0].rstrip().split()[2:]
-    ret = []
-    i = 0
-    while i < len(prms)-1:
-        pname = prms[i][2:]
-        ret.append(pname)
-        ret.append(prms[i+1])
-        i += 2
-    return ' '.join(ret)
+    return lines[0].rstrip()
 
 def get_job_num(s):
     head = s.rstrip('0123456789')
@@ -89,6 +82,56 @@ def main():
     bar.finish()
 
     from operator import itemgetter
-    for e in sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]:
-        print(' '.join([str(x) for x in e]))
-        #print(' '.join([str(x) if type(x) == float else x for x in e]))
+    sorted_results = sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]
+
+    # Format the results into a table
+    table = []
+    for e in sorted_results:
+        entry = [ e[0] ]
+        tokens = e[1].split()
+        for i in range(len(tokens)):
+            if i % 2 == 1:
+                entry += [ tokens[i] ]
+        table += [ entry ]
+
+    # Get the headers
+    headers = [ 'score' ]
+    for e in sorted_results:
+        tokens = e[1].split()
+        assert(len(tokens) % 2 == 0)
+        for i in range(len(tokens)):
+            if i % 2 == 0:
+                headers += [ tokens[i] ]
+        break
+
+    # Prune the table
+    toDelete = set()
+    for col in range(len(headers)):
+        firstVal = table[0][col]
+        allSame = True
+        for row in range(1, len(table)):
+            if not table[row][col] == firstVal:
+                allSame = False
+                break
+        if allSame:
+            toDelete.add(col)
+
+    # Make the pruned headers and table
+    pruned_table = []
+    for row in table:
+        pruned_table.append([])
+    pruned_headers = []
+    for col in range(len(headers)):
+        if not col in toDelete:
+            pruned_headers.append(headers[col])
+        for row in range(len(table)):
+            if not col in toDelete:
+                pruned_table[row].append(table[row][col])
+
+    headers = pruned_headers
+    table = pruned_table
+                
+    #print(headers)
+    #print(table[0])
+    assert(len(headers) == len(table[0]))
+    print(tabulate(table, headers, tablefmt="simple"))

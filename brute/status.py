@@ -5,15 +5,13 @@
 import fnmatch
 import os
 import errno
-from progress.bar import Bar 
+from progress.bar import Bar
 import subprocess
 import argparse
 import importlib
+import asciitable
 from enum import Enum
 from configparser import ConfigParser
-from clusterlib.scheduler import submit # for job submission
-from clusterlib.scheduler import queued_or_running_jobs
-from clusterlib.storage import sqlite3_loads
 from util import get_conf
 from .version import __version__
 
