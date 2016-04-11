@@ -67,20 +67,30 @@ def main():
             path, ext = os.path.splitext(f)
             job_num = get_job_num(path)
             expt_dir = os.path.join(args.workspace, path)
+            foundLog = False
             for f2 in os.listdir(expt_dir):
                 if fnmatch.fnmatch(f2, '*.txt'): # job log output
                     log = os.path.join(expt_dir, f2)
                     result = run_command([args.scraper, log])
+                    foundLog = True
                     if result:
-                        all_results.append((result, prm_str, f))
+                        all_results.append((result, prm_str, f, 'OK'))
                     else:
-                        print('no result for: ' + f)
+                        all_results.append((-float("inf"), prm_str, f, 'NORESULT'))
                     break
+            # Job not run yet
+            if not foundLog:
+                all_results.append((-float("inf"), prm_str, f, 'NOLOG'))
             bar.next()
 
     # End the progress bar
     bar.finish()
 
+    if len(all_results) < 1:
+        print('No results!')
+
+    #print(all_results)
+    
     from operator import itemgetter
     sorted_results = sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]
 
@@ -104,6 +114,9 @@ def main():
                 headers += [ tokens[i] ]
         break
 
+    #print(headers)
+    #print(table)
+    
     # Prune the table
     toDelete = set()
     for col in range(len(headers)):
@@ -113,7 +126,7 @@ def main():
             if not table[row][col] == firstVal:
                 allSame = False
                 break
-        if allSame:
+        if allSame and col > 0:
             toDelete.add(col)
 
     # Make the pruned headers and table
@@ -130,7 +143,17 @@ def main():
 
     headers = pruned_headers
     table = pruned_table
-                
+
+    # Add status information
+    headers.append('status')
+    for i in range(len(table)):
+        table[i].append( sorted_results[i][-1] )
+
+    # Clean up header
+    for i in range(len(headers)):
+        if headers[i].startswith('--'):
+            headers[i] = headers[i][2:]
+        
     #print(headers)
     #print(table[0])
     assert(len(headers) == len(table[0]))
