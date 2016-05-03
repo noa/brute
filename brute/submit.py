@@ -11,7 +11,7 @@ import itertools
 import glob
 from prompter import prompt, yesno
 from configparser import ConfigParser
-import argparse                # for flexible CLI flags
+import argparse
 import pickle
 
 from util import get_conf
@@ -184,7 +184,7 @@ class MyLoader(TaskLoader):
         return task_list, config
 
 def get_job_params(leftovers):
-    assert len(leftovers) % 2 == 0, 'uneven number of left-over arguments'
+    assert len(leftovers) % 2 == 0, 'uneven number of left-over arguments; only key-value arguments are supported'
 
     params = []
     leftovers_dict = dict()
@@ -251,6 +251,9 @@ def main():
     args.brute_script = os.path.abspath(args.brute_script)
     print('script = ' + args.brute_script)
 
+    # Make sure the script exists
+    assert os.path.isfile(args.brute_script), "script argument is not a file"
+    
     # Get the product of parameters
     params = get_job_params(leftovers)
 
