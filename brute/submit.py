@@ -80,6 +80,9 @@ def get_submission_script(cmd, name, workdir, config):
         if config.has_option("slurm","partition"):
             script += " --partition=" + config.get("slurm", "partition")
 
+        if config.has_option("slurm", "account"):
+            script += " --account=" + config.get("slurm", "account")
+
         script += " --cpus-per-task=" + str(config.getint("slurm", "cpus-per-task"))
         script += " --ntasks-per-node=" + str(config.getint("slurm", "ntasks-per-node"))
 
