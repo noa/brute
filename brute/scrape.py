@@ -74,13 +74,13 @@ def main():
                     result = run_command([args.scraper, log])
                     foundLog = True
                     if result:
-                        all_results.append((result, prm_str, f, 'OK'))
+                        all_results.append((result, prm_str, f, 'OK', path))
                     else:
-                        all_results.append((-float("inf"), prm_str, f, 'NORESULT'))
+                        all_results.append((-float("inf"), prm_str, f, 'NORESULT', path))
                     break
             # Job not run yet
             if not foundLog:
-                all_results.append((-float("inf"), prm_str, f, 'NOLOG'))
+                all_results.append((-float("inf"), prm_str, f, 'NOLOG', path))
             bar.next()
 
     # End the progress bar
@@ -102,6 +102,7 @@ def main():
         for i in range(len(tokens)):
             if i % 2 == 1:
                 entry += [ tokens[i] ]
+        entry += [ e[-1] ]
         table += [ entry ]
 
     # Get the headers
@@ -113,7 +114,8 @@ def main():
             if i % 2 == 0:
                 headers += [ tokens[i] ]
         break
-
+    headers += [ 'path' ]
+    
     #print(headers)
     #print(table)
     
@@ -147,7 +149,7 @@ def main():
     # Add status information
     headers.append('status')
     for i in range(len(table)):
-        table[i].append( sorted_results[i][-1] )
+        table[i].append( sorted_results[i][-2] )
 
     # Clean up header
     for i in range(len(headers)):
