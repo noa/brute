@@ -7,7 +7,7 @@ def get_conf(args):
 
     # Brute defaults
     config.add_section("brute")
-    config.set("brute", "env", "slurm")
+    config.set("brute", "env", "local")
 
     # Slurm defaults
     config.add_section("slurm")

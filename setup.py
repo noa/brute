@@ -30,5 +30,5 @@ setup(
     long_description = description,
     author = "Nicholas Andrews",
     author_email = "noandrews@gmail.com",
-    url = "https://bitbucket.org/noandrews/brute",
+    url = "https://github.com/noa/brute",
 )
