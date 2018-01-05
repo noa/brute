@@ -52,10 +52,12 @@ def mkdir_p(path):
     except OSError as exc: # Python >2.5
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
-        else: raise
+        else:
+            raise
+
 
 def get_submission_script(cmd, name, workdir, config):
-    backend=config.get("brute", "env")
+    backend = config.get("brute", "env")
     assert cmd
     assert name
     script = None
@@ -87,19 +89,21 @@ def get_submission_script(cmd, name, workdir, config):
         script += " --ntasks-per-node=" + str(config.getint("slurm", "ntasks-per-node"))
 
     elif backend == "local":
-        script = '#! /usr/bin/env sh\ncd $(dirname $0)\nCMD="%s"\n$CMD &> %s\n' % (cmd, os.path.join(workdir, "log.txt"))
+        script = """#! /usr/bin/env bash
+                    cd $(dirname $0)
+                    CMD="%s"
+                    $CMD &> %s""" % (cmd, os.path.join(workdir, "log.txt"))
     else:
         print("[fatal] unknown backend: " + str(backend))
         sys.exit(1)
 
     return script
 
+
 def write_script_to_file(script, path):
-    #print(type(script))
-    #print(script)
-    f = open(path, 'w')
-    f.write(script)
-    f.close()
+    with open(path, 'w') as f:
+        f.write(script)
+
 
 class MyLoader(TaskLoader):
     @staticmethod
@@ -127,18 +131,18 @@ class MyLoader(TaskLoader):
             if len(MyLoader.args.brute_script_arg) > 0:
                 args = []
                 for arg in MyLoader.args.brute_script_arg:
-                    args += [ arg.replace('#',str(i)) ]
+                    args += [arg.replace('#', str(i))]
                 args = ' '.join(args)
                 param = args + ' ' + param
 
             # Replace any # symbols in param with job index:
-            param = param.replace('#',str(i))
+            param = param.replace('#', str(i))
 
             # Write parameters to work directory:
-            with open( os.path.join(MyLoader.args.brute_dir, job_name+".params"), 'w' ) as f:
+            with open(os.path.join(MyLoader.args.brute_dir, job_name+".params"), 'w') as f:
                 f.write(param+"\n")
 
-            e = MyLoader.config.get("brute","env")
+            e = MyLoader.config.get("brute", "env")
             if e == 'local':
                 job_cmd_str = '%s %s' % (MyLoader.args.brute_script, param)
             elif e == 'slurm':
@@ -155,7 +159,7 @@ class MyLoader(TaskLoader):
             # Make job work dir
             mkdir_task = {
                 'name': 'mkdir' + str(i),
-                'actions':  [ (mkdir_p, [job_work_dir]) ],
+                'actions':  [(mkdir_p, [job_work_dir])],
             }
             task_list.append(dict_to_task(mkdir_task))
 
@@ -170,21 +174,21 @@ class MyLoader(TaskLoader):
 
             write_script_task = {
                 'name': 'script' + str(i),
-                'actions': [ (write_script_to_file, [script, script_path]) ],
+                'actions': [(write_script_to_file, [script, script_path])],
             }
             task_list.append(dict_to_task(write_script_task))
 
             # Run script job
             run_script = {
                 'name': 'run' + str(i),
-                'actions': [ "sh %s" % (script_path) ],
+                'actions': ["bash %s" % (script_path)],
                 'targets': []
             }
             task_list.append(dict_to_task(run_script))
 
-        #print(task_list)
         config = {'verbosity': 2}
         return task_list, config
+
 
 def get_job_params(leftovers):
     assert len(leftovers) % 2 == 0, 'uneven number of left-over arguments; only key-value arguments are supported'
@@ -256,13 +260,11 @@ def main():
 
     # Make sure the script exists
     assert os.path.isfile(args.brute_script), "script argument is not a file"
-    
+
     # Get the product of parameters
     params = get_job_params(leftovers)
 
     print(str(len(params)) + ' tasks')
-    #print('tasks:')
-    #print(params)
 
     if not args.brute_no_prompt:
         proceed = yesno('Submit?')
@@ -274,4 +276,4 @@ def main():
     MyLoader.args = args
     MyLoader.params = params
     MyLoader.config = config
-    sys.exit(DoitMain(loader).run(['--backend','json']))
+    sys.exit(DoitMain(loader).run(['--backend', 'json']))
