@@ -64,16 +64,17 @@ def main():
             job_num = get_job_num(path)
             expt_dir = os.path.join(args.workspace, path)
             foundLog = False
-            for f2 in os.listdir(expt_dir):
-                if fnmatch.fnmatch(f2, '*.txt'): # job log output
-                    log = os.path.join(expt_dir, f2)
-                    result = run_command(['python', args.scraper, log])
-                    foundLog = True
-                    if result:
-                        all_results.append((result, prm_str, f, 'OK', path))
-                    else:
-                        all_results.append((-float("inf"), prm_str, f, 'NORESULT', path))
-                    break
+            if os.path.isdir(expt_dir):
+                for f2 in os.listdir(expt_dir):
+                    if fnmatch.fnmatch(f2, '*.txt'): # job log output
+                        log = os.path.join(expt_dir, f2)
+                        result = run_command(['python', args.scraper, log])
+                        foundLog = True
+                        if result:
+                            all_results.append((result, prm_str, f, 'OK', path))
+                        else:
+                            all_results.append((-float("inf"), prm_str, f, 'NORESULT', path))
+                        break
             # Job not run yet
             if not foundLog:
                 all_results.append((-float("inf"), prm_str, f, 'NOLOG', path))
