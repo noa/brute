@@ -7,15 +7,12 @@ import fnmatch
 import os
 import errno
 from progress.bar import Bar
-import subprocess
+import subprocess as sp
 import argparse
 import importlib
 from tabulate import tabulate
 from enum import Enum
 from configparser import ConfigParser
-from clusterlib.scheduler import submit # for job submission
-from clusterlib.scheduler import queued_or_running_jobs
-from clusterlib.storage import sqlite3_loads
 from .version import __version__
 
 def get_args():
@@ -39,10 +36,9 @@ def get_job_num(s):
     return tail
 
 def run_command(command):
-    p = subprocess.Popen(command,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
-    return float(p.stdout.read())
+    result = sp.run(command, stdout=sp.PIPE)
+    output = result.stdout.decode('utf-8')
+    return float(output)
 
 def main():
     # Read arguments
@@ -71,7 +67,7 @@ def main():
             for f2 in os.listdir(expt_dir):
                 if fnmatch.fnmatch(f2, '*.txt'): # job log output
                     log = os.path.join(expt_dir, f2)
-                    result = run_command([args.scraper, log])
+                    result = run_command(['python', args.scraper, log])
                     foundLog = True
                     if result:
                         all_results.append((result, prm_str, f, 'OK', path))
@@ -89,8 +85,6 @@ def main():
     if len(all_results) < 1:
         print('No results!')
 
-    #print(all_results)
-    
     from operator import itemgetter
     sorted_results = sorted(all_results, key=itemgetter(0), reverse=True)[0:args.max]
 
@@ -115,10 +109,7 @@ def main():
                 headers += [ tokens[i] ]
         break
     headers += [ 'path' ]
-    
-    #print(headers)
-    #print(table)
-    
+
     # Prune the table
     toDelete = set()
     for col in range(len(headers)):
@@ -155,8 +146,6 @@ def main():
     for i in range(len(headers)):
         if headers[i].startswith('--'):
             headers[i] = headers[i][2:]
-        
-    #print(headers)
-    #print(table[0])
+
     assert(len(headers) == len(table[0]))
     print(tabulate(table, headers, tablefmt="simple"))
